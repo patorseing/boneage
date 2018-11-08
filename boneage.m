@@ -150,13 +150,34 @@ function get_img_Callback(hObject, eventdata, handles)
 % choice = 1 singal
 % choice = 2 multi
 global choice;
-if choice == 2
+if choice == 1
+    [filename, pathname] = uigetfile('*.png', 'file select');
+    path = strcat(pathname, filename);
+    pic = imread(path);
+    axes(handles.axes1);
+    imshow(pic);
+%     
+%     pattern = fullfile(pathname, '*.csv');
+%     file = dir(pattern);
+%     base = file.name;
+%     full = fullfile(pathname, base);
+%     data = readtable(full);
+%     name = split(filename, '.');
+%     row = data.CaseID==str2double(name{1}(1));
+%     match = data(row, :);
+%     disp(row);
+%     %set(handles.img_name, 'String', filename);
+%     
+elseif choice == 2
     path = uigetdir('/');
     pattern = fullfile(path, '*.png');
     files = dir(pattern);
     for i = 1: length(files)
         base = files(i).name;
         full = fullfile(path, base);
-        disp(full);
+        pic = imread(full);
+        axes(handles.axes1);
+        imshow(pic);
     end
+    
 end

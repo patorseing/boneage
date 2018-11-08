@@ -72,21 +72,6 @@ function varargout = boneage_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-
-% --- Executes on button press in GET_SINGLE.
-function GET_SINGLE_Callback(hObject, eventdata, handles)
-% hObject    handle to GET_SINGLE (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in GET_MULTIPLE.
-function GET_MULTIPLE_Callback(hObject, eventdata, handles)
-% hObject    handle to GET_MULTIPLE (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
 % --- Executes on selection change in popupmenu2.
 function popupmenu2_Callback(hObject, eventdata, handles)
 % hObject    handle to popupmenu2 (see GCBO)

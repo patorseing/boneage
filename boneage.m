@@ -1,5 +1,4 @@
 function varargout = boneage(varargin)
-% test
 % BONEAGE MATLAB code for boneage.fig
 %      BONEAGE, by itself, creates a new BONEAGE or raises the existing
 %      singleton*.
@@ -23,7 +22,7 @@ function varargout = boneage(varargin)
 
 % Edit the above text to modify the response to help boneage
 
-% Last Modified by GUIDE v2.5 25-Oct-2018 19:37:32
+% Last Modified by GUIDE v2.5 08-Nov-2018 11:45:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -84,5 +83,65 @@ function GET_SINGLE_Callback(hObject, eventdata, handles)
 % --- Executes on button press in GET_MULTIPLE.
 function GET_MULTIPLE_Callback(hObject, eventdata, handles)
 % hObject    handle to GET_MULTIPLE (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on selection change in popupmenu2.
+function popupmenu2_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu2
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function Sex_Callback(hObject, eventdata, handles)
+% hObject    handle to Sex (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of Sex as text
+%        str2double(get(hObject,'String')) returns contents of Sex as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function Sex_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Sex (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in train.
+function train_Callback(hObject, eventdata, handles)
+% hObject    handle to train (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in test.
+function test_Callback(hObject, eventdata, handles)
+% hObject    handle to test (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)

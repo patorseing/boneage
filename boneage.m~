@@ -22,7 +22,7 @@ function varargout = boneage(varargin)
 
 % Edit the above text to modify the response to help boneage
 
-% Last Modified by GUIDE v2.5 08-Nov-2018 12:55:29
+% Last Modified by GUIDE v2.5 08-Nov-2018 12:33:48
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -95,17 +95,11 @@ function popupmenu2_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu2
-global choice;
-
-contents = cellstr(get(hObject, 'String'));
+contents = callstr(get(hObject, 'String'));
 pop_choice = contents{get(hObject, 'Value')};
-if (strcmp(pop_choice, 'Single Image'))
+if (strcmp(pop_choice, 'Select Single'))
     choice = 1;
-elseif (strcmp(pop_choice, 'Multiple Images'))
-    choice = 2;
-else
-    choice = 0;
-end
+else if (strcmp(pop_choice))
 
 % --- Executes during object creation, after setting all properties.
 function popupmenu2_CreateFcn(hObject, eventdata, handles)
@@ -162,5 +156,3 @@ function get_img_Callback(hObject, eventdata, handles)
 % hObject    handle to get_img (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global choice;
-disp(choice);

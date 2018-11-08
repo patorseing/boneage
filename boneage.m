@@ -147,5 +147,16 @@ function get_img_Callback(hObject, eventdata, handles)
 % hObject    handle to get_img (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+% choice = 1 singal
+% choice = 2 multi
 global choice;
-disp(choice);
+if choice == 2
+    path = uigetdir('/');
+    pattern = fullfile(path, '*.png');
+    files = dir(pattern);
+    for i = 1: length(files)
+        base = files(i).name;
+        full = fullfile(path, base);
+        disp(full);
+    end
+end

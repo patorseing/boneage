@@ -150,24 +150,42 @@ function get_img_Callback(hObject, eventdata, handles)
 % choice = 1 singal
 % choice = 2 multi
 global choice;
+set(handles.img_name,'String',' ');
+set(handles.predicted_age,'String',' ');
+set(handles.Sex,'String',' ');
+set(handles.accuracy,'String',' ');
 if choice == 1
     [filename, pathname] = uigetfile('*.png', 'file select');
     path = strcat(pathname, filename);
     pic = imread(path);
     axes(handles.axes1);
     imshow(pic);
-%     
-%     pattern = fullfile(pathname, '*.csv');
-%     file = dir(pattern);
-%     base = file.name;
-%     full = fullfile(pathname, base);
-%     data = readtable(full);
-%     name = split(filename, '.');
-%     row = data.CaseID==str2double(name{1}(1));
-%     match = data(row, :);
-%     disp(row);
-%     %set(handles.img_name, 'String', filename);
-%     
+    id = split(filename, '.');
+    pattern = fullfile(pathname, '*.csv');
+    file = dir(pattern);
+    base = file.name;
+    full = fullfile(pathname, base);
+    opts = detectImportOptions(full,'NumHeaderLines',1); % number of header lines which are to be ignored
+    opts.VariableNamesLine = 1; % row number which has variable names
+    opts.DataLine = 2; % row number from which the actual data starts
+    data = readtable(full,opts);
+    rows = data.Var1==str2double(id{1});
+    match = data(rows,:);
+    for i=1:length(match.Properties.VariableNames)
+        if i == 1
+            set(handles.img_name,'String',match.Var1);
+        elseif i == 2 && length(match.Properties.VariableNames) == 3
+           set(handles.predicted_age,'String',match.Var2);
+        elseif i == 2 && length(match.Properties.VariableNames) == 2
+           set(handles.Sex,'String',match.Var2);
+        elseif i == 3
+            if strcmp(match.Var3{1},'False')
+                set(handles.Sex,'String','F');
+            else
+                set(handles.Sex,'String','M');
+            end
+        end
+    end
 elseif choice == 2
     path = uigetdir('/');
     pattern = fullfile(path, '*.png');
@@ -178,6 +196,31 @@ elseif choice == 2
         pic = imread(full);
         axes(handles.axes1);
         imshow(pic);
+        id = split(base, '.');
+    pattern = fullfile(path, '*.csv');
+    file = dir(pattern);
+    base = file.name;
+    full = fullfile(path, base);
+    opts = detectImportOptions(full,'NumHeaderLines',1); % number of header lines which are to be ignored
+    opts.VariableNamesLine = 1; % row number which has variable names
+    opts.DataLine = 2; % row number from which the actual data starts
+    data = readtable(full,opts);
+    rows = data.Var1==str2double(id{1});
+    match = data(rows,:);
+    for i=1:length(match.Properties.VariableNames)
+        if i == 1
+            set(handles.img_name,'String',match.Var1);
+        elseif i == 2 && length(match.Properties.VariableNames) == 3
+           set(handles.predicted_age,'String',match.Var2);
+        elseif i == 2 && length(match.Properties.VariableNames) == 2
+           set(handles.Sex,'String',match.Var2);
+        elseif i == 3
+           if strcmp(match.Var3{1},'False')
+                set(handles.Sex,'String','F');
+            else
+                set(handles.Sex,'String','M');
+            end
+        end
     end
-    
+    end
 end

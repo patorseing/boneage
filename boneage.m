@@ -22,7 +22,7 @@ function varargout = boneage(varargin)
 
 % Edit the above text to modify the response to help boneage
 
-% Last Modified by GUIDE v2.5 08-Nov-2018 11:45:57
+% Last Modified by GUIDE v2.5 08-Nov-2018 12:33:48
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -143,5 +143,12 @@ function train_Callback(hObject, eventdata, handles)
 % --- Executes on button press in test.
 function test_Callback(hObject, eventdata, handles)
 % hObject    handle to test (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in get_img.
+function get_img_Callback(hObject, eventdata, handles)
+% hObject    handle to get_img (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)

@@ -1,5 +1,5 @@
 % read image
-I = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
+I = imread('/Users/yok/Downloads/boneage-training-dataset/1599.png');
 % I = imresize(I,0.5);
 imshow(I);
 
@@ -19,17 +19,14 @@ J = imresize(J, 0.25);
 figure; imshow(J);
 figure; imshow(mask);
 
-[row,column,numchannel] = size(mask);
+[row column numchannel] = size(mask);
 
 for i = 1:row
     for j = 1: column
-        if mask(i,j) == 0
-            J(i,j) = 0;
-        end
+    
     end
 end
 
-figure; imshow(J);
 
 %% Active contour
 % mask = zeros(size(I));

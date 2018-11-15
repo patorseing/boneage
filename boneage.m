@@ -22,7 +22,7 @@ function varargout = boneage(varargin)
 
 % Edit the above text to modify the response to help boneage
 
-% Last Modified by GUIDE v2.5 08-Nov-2018 12:55:29
+% Last Modified by GUIDE v2.5 15-Nov-2018 11:47:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -224,3 +224,10 @@ elseif choice == 2
     end
     end
 end
+
+
+% --- Executes on button press in clean.
+function clean_Callback(hObject, eventdata, handles)
+% hObject    handle to clean (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

@@ -187,7 +187,7 @@ if choice == 1
         end
     end
 elseif choice == 2
-    path = uigetdir('/');
+    path = uigetdir(path);
     pattern = fullfile(path, '*.png');
     files = dir(pattern);
     for i = 1: length(files)

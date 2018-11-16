@@ -1,5 +1,6 @@
 % read image
-I = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
+%I = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
+I = imread('.png');
 % I = imresize(I,0.5);
 imshow(I);
 
@@ -31,6 +32,12 @@ end
 
 figure; imshow(J);
 
+close all
+pwd
+mkdir newdir
+cd newdir
+imwrite(J, 'a.png');
+
 %% Active contour
 % mask = zeros(size(I));
 % mask(25:end-25,25:end-25) = 1;
@@ -59,4 +66,6 @@ figure; imshow(J);
 % figure, imshow(BWsdil), title('dilated gradient mask');
 % Kmedian = medfilt2(BWsdil);
 % figure; imshow(Kmedian); title('Kmedian');
-
+%%
+a = [4360 180 true;4360 180 false];
+dlmwrite('myFile.csv',a,'-append','delimiter',',','roffset',0)

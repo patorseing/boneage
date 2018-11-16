@@ -22,7 +22,7 @@ function varargout = boneage(varargin)
 
 % Edit the above text to modify the response to help boneage
 
-% Last Modified by GUIDE v2.5 15-Nov-2018 11:47:09
+% Last Modified by GUIDE v2.5 16-Nov-2018 08:54:55
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -106,18 +106,18 @@ end
 
 
 
-function Sex_Callback(hObject, eventdata, handles)
-% hObject    handle to Sex (see GCBO)
+function Predict_Callback(hObject, eventdata, handles)
+% hObject    handle to Predict (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of Sex as text
-%        str2double(get(hObject,'String')) returns contents of Sex as a double
+% Hints: get(hObject,'String') returns contents of Predict as text
+%        str2double(get(hObject,'String')) returns contents of Predict as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function Sex_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to Sex (see GCBO)
+function Predict_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Predict (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -151,15 +151,35 @@ function get_img_Callback(hObject, eventdata, handles)
 % choice = 2 multi
 global choice;
 set(handles.img_name,'String',' ');
-set(handles.predicted_age,'String',' ');
+set(handles.age,'String',' ');
+set(handles.Predict,'String',' ');
 set(handles.Sex,'String',' ');
-set(handles.accuracy,'String',' ');
+mkdir dataset
 if choice == 1
+    cd dataset;
     [filename, pathname] = uigetfile('*.png', 'file select');
     path = strcat(pathname, filename);
     pic = imread(path);
     axes(handles.axes1);
+    pic = histeq(pic);
+        % convert to bw
+        img = im2bw(pic, 0.6);
+        % mask
+        se = strel('disk',10);
+        mask = imopen(img,se);
+        mask = imresize(mask, 0.25);
+        pic = imresize(pic, 0.25);
+        [row,column,numchannel] = size(mask);
+
+        for i = 1:row
+            for j = 1: column
+                if mask(i,j) == 0
+                    pic(i,j) = 0;
+                end
+            end
+        end
     imshow(pic);
+    imwrite(pic, filename);
     id = split(filename, '.');
     pattern = fullfile(pathname, '*.csv');
     file = dir(pattern);
@@ -171,22 +191,41 @@ if choice == 1
     data = readtable(full,opts);
     rows = data.Var1==str2double(id{1});
     match = data(rows,:);
+    line = zeros(1,length(match.Properties.VariableNames),'uint32')
+    count = 1;
     for i=1:length(match.Properties.VariableNames)
         if i == 1
             set(handles.img_name,'String',match.Var1);
+            line(1,count) = match.Var1;
+            count=count+1;
         elseif i == 2 && length(match.Properties.VariableNames) == 3
-           set(handles.predicted_age,'String',match.Var2);
+           set(handles.age,'String',match.Var2);
+           line(1,count) = match.Var2;
+           count=count+1;
         elseif i == 2 && length(match.Properties.VariableNames) == 2
            set(handles.Sex,'String',match.Var2);
+           if strcmp(match.Var2,'F')
+               line(1,count) = false;
+           else
+               line(1,count) = true;
+           end
+           count=count+1;
         elseif i == 3
             if strcmp(match.Var3{1},'False')
                 set(handles.Sex,'String','F');
+                line(1,count) = false;
+                count=count+1;
             else
                 set(handles.Sex,'String','M');
+                line(1,count) = true;
+                count=count+1;
             end
         end
     end
+    dlmwrite('dataset.csv',line,'-append','delimiter',',','roffset',0)
+    cd ..;
 elseif choice == 2
+    cd dataset;
     path = uigetdir();
     pattern = fullfile(path, '*.png');
     files = dir(pattern);
@@ -195,34 +234,70 @@ elseif choice == 2
         full = fullfile(path, base);
         pic = imread(full);
         axes(handles.axes1);
-        imshow(pic);
-        id = split(base, '.');
-    pattern = fullfile(path, '*.csv');
-    file = dir(pattern);
-    base = file.name;
-    full = fullfile(path, base);
-    opts = detectImportOptions(full,'NumHeaderLines',1); % number of header lines which are to be ignored
-    opts.VariableNamesLine = 1; % row number which has variable names
-    opts.DataLine = 2; % row number from which the actual data starts
-    data = readtable(full,opts);
-    rows = data.Var1==str2double(id{1});
-    match = data(rows,:);
-    for i=1:length(match.Properties.VariableNames)
-        if i == 1
-            set(handles.img_name,'String',match.Var1);
-        elseif i == 2 && length(match.Properties.VariableNames) == 3
-           set(handles.predicted_age,'String',match.Var2);
-        elseif i == 2 && length(match.Properties.VariableNames) == 2
-           set(handles.Sex,'String',match.Var2);
-        elseif i == 3
-           if strcmp(match.Var3{1},'False')
-                set(handles.Sex,'String','F');
-            else
-                set(handles.Sex,'String','M');
+        pic = histeq(pic);
+        % convert to bw
+        img = im2bw(pic, 0.6);
+        % mask
+        se = strel('disk',10);
+        mask = imopen(img,se);
+        mask = imresize(mask, 0.25);
+        pic = imresize(pic, 0.25);
+        [row,column,numchannel] = size(mask);
+
+        for i = 1:row
+            for j = 1: column
+                if mask(i,j) == 0
+                    pic(i,j) = 0;
+                end
             end
         end
+        imwrite(pic, base);
+        imshow(pic);
+        id = split(base, '.');
+        pattern = fullfile(path, '*.csv');
+        file = dir(pattern);
+        base = file.name;
+        full = fullfile(path, base);
+        opts = detectImportOptions(full,'NumHeaderLines',1); % number of header lines which are to be ignored
+        opts.VariableNamesLine = 1; % row number which has variable names
+        opts.DataLine = 2; % row number from which the actual data starts
+        data = readtable(full,opts);
+        rows = data.Var1==str2double(id{1});
+        match = data(rows,:);
+        line = zeros(1,length(match.Properties.VariableNames),'uint32')
+        count = 1;
+        for i=1:length(match.Properties.VariableNames)
+            if i == 1
+                set(handles.img_name,'String',match.Var1);
+                line(1,count) = match.Var1;
+                count=count+1;
+            elseif i == 2 && length(match.Properties.VariableNames) == 3
+               set(handles.age,'String',match.Var2);
+               line(1,count) = match.Var2;
+               count=count+1;
+            elseif i == 2 && length(match.Properties.VariableNames) == 2
+               set(handles.Sex,'String',match.Var2);
+               if strcmp(match.Var2,'F')
+                line(1,count) = false;
+               else
+                   line(1,count) = true;
+               end
+               count=count+1;
+            elseif i == 3
+               if strcmp(match.Var3{1},'False')
+                    set(handles.Sex,'String','F');
+                    line(1,count) = false;
+                    count=count+1;
+                else
+                    set(handles.Sex,'String','M');
+                    line(1,count) = true;
+                    count=count+1;
+                end
+            end
+        end
+        dlmwrite('dataset.csv',line,'-append','delimiter',',','roffset',0)
     end
-    end
+    cd ..;
 end
 
 

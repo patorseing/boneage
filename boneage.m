@@ -22,7 +22,7 @@ function varargout = boneage(varargin)
 
 % Edit the above text to modify the response to help boneage
 
-% Last Modified by GUIDE v2.5 16-Nov-2018 08:54:55
+% Last Modified by GUIDE v2.5 17-Nov-2018 11:30:14
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,7 +57,13 @@ handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
-
+files = dir(pwd);
+% Get a logical vector that tells which is a directory.
+dirFlags = [files.isdir];
+% Extract only those that are directories.
+subFolders = files(dirFlags);
+set(handles.lb,'string',{subFolders.name});
+%set(handles.lb,'string',line);
 % UIWAIT makes boneage wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
@@ -72,14 +78,14 @@ function varargout = boneage_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-% --- Executes on selection change in popupmenu2.
-function popupmenu2_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu2 (see GCBO)
+% --- Executes on selection change in DATALOAD.
+function DATALOAD_Callback(hObject, eventdata, handles)
+% hObject    handle to DATALOAD (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu2
+% Hints: contents = cellstr(get(hObject,'String')) returns DATALOAD contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from DATALOAD
 global choice;
 
 contents = cellstr(get(hObject, 'String'));
@@ -93,8 +99,8 @@ else
 end
 
 % --- Executes during object creation, after setting all properties.
-function popupmenu2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu2 (see GCBO)
+function DATALOAD_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to DATALOAD (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -133,7 +139,64 @@ function train_Callback(hObject, eventdata, handles)
 % hObject    handle to train (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+all = get(handles.lb,'String');
+idx = get(handles.lb,'value');
+set(handles.img_name,'String',' ');
+set(handles.age,'String',' ');
+set(handles.Predict,'String',' ');
+set(handles.Sex,'String',' ');
+axes(handles.axes1); cla;
+if idx > 3
+    path = all{idx};
+    pattern = fullfile(path, '*.png');
+    files = dir(pattern);
+    for i = 1: length(files)
+        base = files(i).name;
+        full = fullfile(path, base);
+        pic = imread(full);
+        axes(handles.axes1);
+        imshow(pic);
+        id = split(base, '.');
+        pattern = fullfile(path, '*.csv');
+        file = dir(pattern);
+        base = file.name;
+        full = fullfile(path, base);
+        data = readtable(full,'Delimiter',',','ReadVariableNames',false);
+        rows = data.Var1==str2double(id{1});
+        match = data(rows,:);
+        line = zeros(1,length(match.Properties.VariableNames),'uint32');
+        count = 1;
+        for i=1:length(match.Properties.VariableNames)
+            if i == 1
+                set(handles.img_name,'String',match.Var1);
+                line(1,count) = match.Var1;
+                count=count+1;
+            elseif i == 2 && length(match.Properties.VariableNames) == 3
+               set(handles.age,'String',match.Var2);
+               line(1,count) = match.Var2;
+               count=count+1;
+            elseif i == 2 && length(match.Properties.VariableNames) == 2
+               set(handles.Sex,'String',match.Var2);
+               if strcmp(match.Var2,'F')
+                line(1,count) = false;
+               else
+                   line(1,count) = true;
+               end
+               count=count+1;
+            elseif i == 3
+               if strcmp(match.Var3{1},'False')
+                    set(handles.Sex,'String','F');
+                    line(1,count) = false;
+                    count=count+1;
+                else
+                    set(handles.Sex,'String','M');
+                    line(1,count) = true;
+                    count=count+1;
+                end
+            end
+        end
+    end
+end
 
 % --- Executes on button press in test.
 function test_Callback(hObject, eventdata, handles)
@@ -150,13 +213,24 @@ function get_img_Callback(hObject, eventdata, handles)
 % choice = 1 singal
 % choice = 2 multi
 global choice;
+disp(choice);
 set(handles.img_name,'String',' ');
 set(handles.age,'String',' ');
 set(handles.Predict,'String',' ');
 set(handles.Sex,'String',' ');
-mkdir dataset
+axes(handles.axes1); cla;
+files = dir(pwd);
+% Get a logical vector that tells which is a directory.
+dirFlags = [files.isdir];
+% Extract only those that are directories.
+subFolders = files(dirFlags);
+num = length(subFolders);
+fileN = strcat('dataset',num2str(num));
+if choice > 0
+    mkdir(fileN);
+end
 if choice == 1
-    cd dataset;
+    cd(fileN);
     [filename, pathname] = uigetfile('*.png', 'file select');
     path = strcat(pathname, filename);
     pic = imread(path);
@@ -169,7 +243,7 @@ if choice == 1
         mask = imopen(img,se);
         mask = imresize(mask, 0.25);
         pic = imresize(pic, 0.25);
-        [row,column,numchannel] = size(mask);
+        [row,column,~] = size(mask);
 
         for i = 1:row
             for j = 1: column
@@ -191,7 +265,7 @@ if choice == 1
     data = readtable(full,opts);
     rows = data.Var1==str2double(id{1});
     match = data(rows,:);
-    line = zeros(1,length(match.Properties.VariableNames),'uint32')
+    line = zeros(1,length(match.Properties.VariableNames),'uint32');
     count = 1;
     for i=1:length(match.Properties.VariableNames)
         if i == 1
@@ -225,7 +299,7 @@ if choice == 1
     dlmwrite('dataset.csv',line,'-append','delimiter',',','roffset',0)
     cd ..;
 elseif choice == 2
-    cd dataset;
+    cd(fileN);
     path = uigetdir();
     pattern = fullfile(path, '*.png');
     files = dir(pattern);
@@ -242,7 +316,7 @@ elseif choice == 2
         mask = imopen(img,se);
         mask = imresize(mask, 0.25);
         pic = imresize(pic, 0.25);
-        [row,column,numchannel] = size(mask);
+        [row,column,~] = size(mask);
 
         for i = 1:row
             for j = 1: column
@@ -264,7 +338,7 @@ elseif choice == 2
         data = readtable(full,opts);
         rows = data.Var1==str2double(id{1});
         match = data(rows,:);
-        line = zeros(1,length(match.Properties.VariableNames),'uint32')
+        line = zeros(1,length(match.Properties.VariableNames),'uint32');
         count = 1;
         for i=1:length(match.Properties.VariableNames)
             if i == 1
@@ -299,6 +373,13 @@ elseif choice == 2
     end
     cd ..;
 end
+files = dir(pwd);
+% Get a logical vector that tells which is a directory.
+dirFlags = [files.isdir];
+% Extract only those that are directories.
+subFolders = files(dirFlags);
+set(handles.lb,'string',{subFolders.name});
+
 
 
 % --- Executes on button press in clean.
@@ -306,3 +387,54 @@ function clean_Callback(hObject, eventdata, handles)
 % hObject    handle to clean (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on selection change in DATA.
+function DATA_Callback(hObject, eventdata, handles)
+% hObject    handle to DATA (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns DATA contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from DATA
+a='you';b='are';c='crazy';
+s={a,b,c};
+set(handles.DATA,'string',s)
+contents = cellstr(get(hObject, 'String'));
+pop_choice = contents{get(hObject, 'Value')};
+disp(pop_choice);
+
+% --- Executes during object creation, after setting all properties.
+function DATA_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to DATA (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in lb.
+function lb_Callback(hObject, eventdata, handles)
+% hObject    handle to lb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns lb contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from lb
+
+
+% --- Executes during object creation, after setting all properties.
+function lb_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to lb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

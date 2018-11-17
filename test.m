@@ -69,3 +69,14 @@ imwrite(J, 'a.png');
 %%
 a = [4360 180 true;4360 180 false];
 dlmwrite('myFile.csv',a,'-append','delimiter',',','roffset',0)
+%%
+% Get a list of all files and folders in this folder.
+files = dir(pwd);
+% Get a logical vector that tells which is a directory.
+dirFlags = [files.isdir];
+% Extract only those that are directories.
+subFolders = files(dirFlags);
+% Print folder names to command window.
+for k = 1 : length(subFolders)
+  fprintf('Sub folder #%d = %s\n', k, subFolders(k).name);
+end

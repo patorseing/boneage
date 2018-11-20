@@ -1,6 +1,5 @@
 % read image
-% I = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
-I = imread('/Users/yok/Downloads/boneage-test-dataset/4365.png');
+I = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
 imshow(I);
 
 % adjust contrast
@@ -9,7 +8,6 @@ figure; imshow(J);
 
 %%
 % convert to bw
-
 img = im2bw(J, 0.6);
 figure; imshow(img);
 
@@ -102,24 +100,10 @@ legend('ptsOriginal', 'ptsDistorted');
 %% colormap
 % I = imread('/Users/yok/Downloads/boneage-training-dataset/1378.png');
 % I = imread('/Users/yok/Documents/MATLAB/DigitalImageProcessing/boneage/dataset3/4365.png');
-% I = imread('/Users/yok/Downloads/boneage-test-dataset/4365.png');
-I = histeq(J, 64);
+I = imread('/Users/yok/Downloads/boneage-test-dataset/4365.png');
+I = histeq(I, 64);
 y = colormap(parula(250));
 imwrite(I, y, 'rgb.jpg', 'jpg');
 imshow('rgb.jpg');
 % J = histeq(I, 64);
 % figure; imshow(J);
-
-%%
-I = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
-se = strel('disk', 15);
-background = imopen(I,se);
-imshow(background);
-I2 = I - background;
-imshow(I2);
-I3 = imadjust(I2);
-imshow(I3);
-bw = imbinarize(I3);
-bw = bwareaopen(bw,50);
-imshow(bw);
-figure; imhist(bw);

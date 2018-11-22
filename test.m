@@ -1,6 +1,8 @@
 % read image
 % I = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
-I = imread('/Users/yok/Downloads/boneage-test-dataset/4365.png');
+%I = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
+I = imread('4360.png');
+% I = imresize(I,0.5);
 imshow(I);
 
 % adjust contrast
@@ -144,6 +146,7 @@ I2 = I2 - background;
 imshow(I2);
 I2 = imadjust(I2);
 imshow(I2);
+<<<<<<< HEAD
 bw2 = imbinarize(I2);
 bw2 = bwareaopen(bw2,50);
 imshow(bw2);
@@ -162,3 +165,37 @@ figure;
 h2 = histogram(bone_area2);
 title('histogram of bone area ---- 2');
 % similarity = 1 - norm();
+=======
+I3 = imadjust(I2);
+imshow(I3);
+bw = imbinarize(I3);
+bw = bwareaopen(bw,50);
+imshow(bw);
+figure; imhist(bw);
+files = dir(pwd);
+% Get a logical vector that tells which is a directory.
+dirFlags = [files.isdir];
+% Extract only those that are directories.
+subFolders = files(dirFlags);
+% Print folder names to command window.
+for k = 1 : length(subFolders)
+  fprintf('Sub folder #%d = %s\n', k, subFolders(k).name);
+end
+%%
+points = detectSURFFeatures(J);
+[features, valid_points] = extractFeatures(I, points); 
+figure; imshow(J); hold on;
+plot(valid_points.selectStrongest(10),'showOrientation',true);
+points = detectHarrisFeatures(J);
+[features, valid_corners] = extractFeatures(I, points); 
+figure; imshow(J); hold on;
+plot(valid_corners);
+points = detectHarrisFeatures(J);
+[features, valid_corners] = extractFeatures(I, points); 
+figure; imshow(J); hold on;
+plot(valid_points,'showOrientation',true);
+%%
+I = imread('4360.png');
+se = strel(eye(5));
+nhood = getnhood(se);
+

@@ -234,24 +234,9 @@ if choice == 1
     [filename, pathname] = uigetfile('*.png', 'file select');
     path = strcat(pathname, filename);
     pic = imread(path);
+    pic = imresize(pic, .5);
+    pic = imadjust(pic);
     axes(handles.axes1);
-    pic = histeq(pic);
-        % convert to bw
-        img = im2bw(pic, 0.6);
-        % mask
-        se = strel('disk',10);
-        mask = imopen(img,se);
-        mask = imresize(mask, 0.25);
-        pic = imresize(pic, 0.25);
-        [row,column,~] = size(mask);
-
-        for i = 1:row
-            for j = 1: column
-                if mask(i,j) == 0
-                    pic(i,j) = 0;
-                end
-            end
-        end
     imshow(pic);
     imwrite(pic, filename);
     id = split(filename, '.');
@@ -307,24 +292,9 @@ elseif choice == 2
         base = files(i).name;
         full = fullfile(path, base);
         pic = imread(full);
+        pic = imresize(pic, .5);
+        pic = imadjust(pic);
         axes(handles.axes1);
-        pic = histeq(pic);
-        % convert to bw
-        img = im2bw(pic, 0.6);
-        % mask
-        se = strel('disk',10);
-        mask = imopen(img,se);
-        mask = imresize(mask, 0.25);
-        pic = imresize(pic, 0.25);
-        [row,column,~] = size(mask);
-
-        for i = 1:row
-            for j = 1: column
-                if mask(i,j) == 0
-                    pic(i,j) = 0;
-                end
-            end
-        end
         imwrite(pic, base);
         imshow(pic);
         id = split(base, '.');

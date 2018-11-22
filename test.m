@@ -1,12 +1,20 @@
 % read image
-I = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
-K = imread('/Users/yok/Downloads/boneage-training-dataset/1379.png');
-L = imread('/Users/yok/Downloads/boneage-training-dataset/1396.png');
+%I = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
+%K = imread('/Users/yok/Downloads/boneage-training-dataset/1379.png');
+%L = imread('/Users/yok/Downloads/boneage-training-dataset/1396.png');
+I = imread('/Users/patorseing/Downloads/rsna-bone-age/boneage-training-dataset/3806.png');
+K = imread('/Users/patorseing/Downloads/rsna-bone-age/boneage-training-dataset/1902.png');
+L = imread('/Users/patorseing/Downloads/rsna-bone-age/boneage-training-dataset/4199.png');
 %I = imread('4360.png');
 L = imresize(L,0.5);
 K = imresize(K,0.5);
 I = imresize(I,0.5);
-imshow(I);
+L = imadjust(L);
+K = imadjust(K);
+I = imadjust(I);
+figure;imshow(I);
+figure;imshow(K);
+figure;imshow(L);
 
 %% adjust contrast
 J = histeq(I, 64);

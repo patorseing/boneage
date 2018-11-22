@@ -110,16 +110,55 @@ imshow('rgb.jpg');
 % J = histeq(I, 64);
 % figure; imshow(J);
 
-%%
-I = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
+%% I1
+I1 = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
 se = strel('disk', 15);
-background = imopen(I,se);
+background = imopen(I1,se);
 imshow(background);
-I2 = I - background;
+I1 = I1 - background;
+imshow(I1);
+I1 = imadjust(I1);
+imshow(I1);
+bw1 = imbinarize(I1);
+bw1 = bwareaopen(bw1,50);
+imshow(bw1);
+% Identify objects
+cc1 = bwconncomp(bw1,26);
+bone1 = false(size(bw1));
+% area
+bonedata1 = regionprops(cc1,'basic');
+bone_area1 = [bonedata1.Area];
+figure; 
+h1 = histogram(bone_area1);
+title('histogram of bone area ---- 1');
+% figure; 
+% for i = 1:cc.NumObjects
+%     bone(cc.PixelIdxList{i}) = true;
+%     imshow(bone);
+% end
+% I2
+I2 = imread('/Users/yok/Downloads/boneage-training-dataset/1382.png');
+background = imopen(I2,se);
+figure; imshow(background);
+I2 = I2 - background;
 imshow(I2);
-I3 = imadjust(I2);
-imshow(I3);
-bw = imbinarize(I3);
-bw = bwareaopen(bw,50);
-imshow(bw);
-figure; imhist(bw);
+I2 = imadjust(I2);
+imshow(I2);
+bw2 = imbinarize(I2);
+bw2 = bwareaopen(bw2,50);
+imshow(bw2);
+% Identify objects
+cc2 = bwconncomp(bw2,26);
+bone2 = false(size(bw2));
+% %%
+% labeled = labelmatrix(cc);
+% RGB_label = label2rgb(labeled, 'spring', 'c', 'shuffle');
+% imshow(RGB_label);
+%
+% area
+bonedata2 = regionprops(cc2,'basic');
+bone_area2 = [bonedata2.Area];
+figure; 
+h2 = histogram(bone_area2);
+title('histogram of bone area ---- 2');
+% similarity = 1 - norm();

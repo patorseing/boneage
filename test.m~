@@ -1,5 +1,6 @@
 % read image
-I = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
+% I = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
+I = imread('/Users/yok/Downloads/boneage-test-dataset/4365.png');
 imshow(I);
 
 % adjust contrast
@@ -8,6 +9,7 @@ figure; imshow(J);
 
 %%
 % convert to bw
+
 img = im2bw(J, 0.6);
 figure; imshow(img);
 
@@ -100,10 +102,57 @@ legend('ptsOriginal', 'ptsDistorted');
 %% colormap
 % I = imread('/Users/yok/Downloads/boneage-training-dataset/1378.png');
 % I = imread('/Users/yok/Documents/MATLAB/DigitalImageProcessing/boneage/dataset3/4365.png');
-I = imread('/Users/yok/Downloads/boneage-test-dataset/4365.png');
-I = histeq(I, 64);
+% I = imread('/Users/yok/Downloads/boneage-test-dataset/4365.png');
+I = histeq(J, 64);
 y = colormap(parula(250));
 imwrite(I, y, 'rgb.jpg', 'jpg');
 imshow('rgb.jpg');
 % J = histeq(I, 64);
 % figure; imshow(J);
+
+%% I1
+I1 = imread('/Users/yok/Downloads/boneage-training-dataset/1377.png');
+se = strel('disk', 15);
+background = imopen(I1,se);
+imshow(background);
+I1 = I1 - background;
+imshow(I1);
+I1 = imadjust(I1);
+imshow(I1);
+bw1 = imbinarize(I1);
+bw1 = bwareaopen(bw1,50);
+imshow(bw1);
+% Identify objects
+cc1 = bwconncomp(bw1,26);
+bone1 = false(size(bw1));
+% figure; 
+% for i = 1:cc.NumObjects
+%     bone(cc.PixelIdxList{i}) = true;
+%     imshow(bone);
+% end
+%% I2
+I2 = imread('/Users/yok/Downloads/boneage-training-dataset/1382.png');
+background = imopen(I2,se);
+figure; imshow(background);
+I2 = I2 - background;
+imshow(I2);
+I2 = imadjust(I2);
+imshow(I2);
+bw2 = imbinarize(I2);
+bw2 = bwareaopen(bw2,50);
+imshow(bw2);
+% Identify objects
+cc2 = bwconncomp(bw2,26);
+bone2 = false(size(bw2));
+% %%
+% labeled = labelmatrix(cc);
+% RGB_label = label2rgb(labeled, 'spring', 'c', 'shuffle');
+% imshow(RGB_label);
+%
+% area
+bonedata2 = regionprops(cc2,'basic');
+bone_area2 = [bonedata2.Area];
+figure; 
+h2 = histogram(bone_area2);
+title('histogram of bone area (1_');
+similarity = 1 - norm();

@@ -22,7 +22,7 @@ function varargout = boneage(varargin)
 
 % Edit the above text to modify the response to help boneage
 
-% Last Modified by GUIDE v2.5 22-Nov-2018 16:17:25
+% Last Modified by GUIDE v2.5 24-Nov-2018 15:29:00
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -63,6 +63,7 @@ dirFlags = [files.isdir];
 % Extract only those that are directories.
 subFolders = files(dirFlags);
 set(handles.lb,'string',{subFolders.name});
+set(handles.lb2,'string',{subFolders.name});
 %set(handles.lb,'string',line);
 % UIWAIT makes boneage wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -112,18 +113,18 @@ end
 
 
 
-function Predict_Callback(hObject, eventdata, handles)
-% hObject    handle to Predict (see GCBO)
+function predict_Callback(hObject, eventdata, handles)
+% hObject    handle to predict (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of Predict as text
-%        str2double(get(hObject,'String')) returns contents of Predict as a double
+% Hints: get(hObject,'String') returns contents of predict as text
+%        str2double(get(hObject,'String')) returns contents of predict as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function Predict_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to Predict (see GCBO)
+function predict_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to predict (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -134,75 +135,116 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in train.
-function train_Callback(hObject, eventdata, handles)
-% hObject    handle to train (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-all = get(handles.lb,'String');
-idx = get(handles.lb,'value');
-set(handles.img_name,'String',' ');
-set(handles.age,'String',' ');
-set(handles.Predict,'String',' ');
-set(handles.Sex,'String',' ');
-axes(handles.axes1); cla;
-if idx > 3
-    path = all{idx};
-    pattern = fullfile(path, '*.png');
-    files = dir(pattern);
-    for i = 1: length(files)
-        base = files(i).name;
-        full = fullfile(path, base);
-        pic = imread(full);
-        axes(handles.axes1);
-        imshow(pic);
-        id = split(base, '.');
-        pattern = fullfile(path, '*.csv');
-        file = dir(pattern);
-        base = file.name;
-        full = fullfile(path, base);
-        data = readtable(full,'Delimiter',',','ReadVariableNames',false);
-        rows = data.Var1==str2double(id{1});
-        match = data(rows,:);
-        line = zeros(1,length(match.Properties.VariableNames),'uint32');
-        count = 1;
-        for i=1:length(match.Properties.VariableNames)
-            if i == 1
-                set(handles.img_name,'String',match.Var1);
-                line(1,count) = match.Var1;
-                count=count+1;
-            elseif i == 2 && length(match.Properties.VariableNames) == 3
-               set(handles.age,'String',match.Var2);
-               line(1,count) = match.Var2;
-               count=count+1;
-            elseif i == 2 && length(match.Properties.VariableNames) == 2
-               set(handles.Sex,'String',match.Var2);
-               if strcmp(match.Var2,'F')
-                line(1,count) = false;
-               else
-                   line(1,count) = true;
-               end
-               count=count+1;
-            elseif i == 3
-               if strcmp(match.Var3{1},'False')
-                    set(handles.Sex,'String','F');
-                    line(1,count) = false;
-                    count=count+1;
-                else
-                    set(handles.Sex,'String','M');
-                    line(1,count) = true;
-                    count=count+1;
-                end
-            end
-        end
-    end
-end
-
 % --- Executes on button press in test.
 function test_Callback(hObject, eventdata, handles)
 % hObject    handle to test (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+train = get(handles.lb2,'String');
+idx2 = get(handles.lb2,'value');
+test = get(handles.lb,'String');
+idx = get(handles.lb,'value');
+set(handles.img_name,'String',' ');
+set(handles.age,'String',' ');
+set(handles.predict,'String',' ');
+set(handles.accuracy,'String',' ');
+axes(handles.axes1); cla;
+total = 0;
+if idx > 3 & idx2 > 3 & idx ~= idx2 
+    set(handles.img_name,'String',' ');
+    set(handles.age,'String',' ');
+    set(handles.predict,'String',' ');
+    set(handles.accuracy,'String',' ');
+    trainpath = train{idx2};
+    testpath = test{idx};
+    pattern = fullfile(trainpath, '*.png');
+    trainfiles = dir(pattern);
+    pattern = fullfile(testpath, '*.png');
+    testfiles = dir(pattern);
+    for i = 1: length(testfiles)
+        line = [];
+        xt = 0;
+        xmea = 0;
+        base = testfiles(i).name;
+        full = fullfile(testpath, base);
+        pic = imread(full);
+        axes(handles.axes1);
+        imshow(pic);
+        originalImg = [];
+        compareMat = [];
+        featuresI = extractLBPFeatures(pic,'Upright',false);
+        id = split(base, '.');
+        pattern = fullfile(testpath, '*.csv');
+        file = dir(pattern);
+        base = file.name;
+        full = fullfile(testpath, base);
+        data = readtable(full,'Delimiter',',','ReadVariableNames',false);
+        rows = data.Var1==str2double(id{1});
+        match = data(rows,:);
+        set(handles.img_name,'String',match.Var1);
+        line = [line uint64(match.Var1)];
+        if length(match.Properties.VariableNames) == 2
+            set(handles.age,'String',match.Var2);
+            xt = match.Var2; % xt = true value
+            line = [line xt];
+        end
+        tic
+        for j = 1: length(trainfiles)
+            base = trainfiles(j).name;
+            full = fullfile(trainpath, base);
+            pic = imread(full);
+            originalImg = [originalImg {full}];
+            featuresK = extractLBPFeatures(pic,'Upright',false);
+            compare = (featuresI-featuresK).^2;
+            [row,column] = size(featuresI);
+            d1 = 0;
+            for k=1:column
+                d1 = d1 + ((featuresI(k) - featuresK(k))^2);
+            end
+            d1 = sqrt(d1);
+            compareMat = [compareMat d1];
+            axes(handles.axes3);
+            imshow(pic);
+        end
+        toc
+        if min(compareMat) == 0
+            out = min(setdiff(compareMat,min(compareMat)));
+            [row,col] = find(compareMat==out);
+        else
+            [out, col] = min(compareMat); 
+        end
+        pic = imread(char(originalImg(col)));
+        axes(handles.axes3);
+        imshow(pic);
+        disp(char(originalImg(col)));
+        disp(out);
+        base = split(char(originalImg(col)), '/');
+        id = split(base(2), '.');
+        pattern = fullfile(trainpath, '*.csv');
+        file = dir(pattern);
+        base = file.name;
+        full = fullfile(trainpath, base);
+        data = readtable(full,'Delimiter',',','ReadVariableNames',false);
+        rows = data.Var1==str2double(id{1});
+        line = [line uint64(str2num(id{1}))];
+        match = data(rows,:);
+        if length(match.Properties.VariableNames) == 2
+            set(handles.predict,'String',match.Var2);
+            xmea = match.Var2;
+            line = [line xmea];
+            % load gong;
+            % sound(y,Fs);
+            accuracy = abs(100 - (abs((xmea - xt) / xt) * 100));
+            line = [line accuracy];
+            set(handles.accuracy,'String',accuracy);
+            total = total + accuracy;
+        end
+        disp(line);
+        dlmwrite('result.csv',line,'-append','delimiter',',','roffset',0)
+    end
+    total = total / length(testfiles);
+    dlmwrite('result.csv',total,'-append','delimiter',',','roffset',0)
+end
 
 
 % --- Executes on button press in get_img.
@@ -216,9 +258,10 @@ global choice;
 disp(choice);
 set(handles.img_name,'String',' ');
 set(handles.age,'String',' ');
-set(handles.Predict,'String',' ');
-set(handles.Sex,'String',' ');
+set(handles.predict,'String',' ');
+set(handles.accuracy,'String',' ');
 axes(handles.axes1); cla;
+axes(handles.axes3); cla;
 files = dir(pwd);
 % Get a logical vector that tells which is a directory.
 dirFlags = [files.isdir];
@@ -250,35 +293,14 @@ if choice == 1
     data = readtable(full,opts);
     rows = data.Var1==str2double(id{1});
     match = data(rows,:);
-    line = zeros(1,length(match.Properties.VariableNames),'uint32');
-    count = 1;
+    line = [];
     for i=1:length(match.Properties.VariableNames)
         if i == 1
             set(handles.img_name,'String',match.Var1);
-            line(1,count) = match.Var1;
-            count=count+1;
+            line = [line match.Var1];
         elseif i == 2 && length(match.Properties.VariableNames) == 3
            set(handles.age,'String',match.Var2);
-           line(1,count) = match.Var2;
-           count=count+1;
-        elseif i == 2 && length(match.Properties.VariableNames) == 2
-           set(handles.Sex,'String',match.Var2);
-           if strcmp(match.Var2,'F')
-               line(1,count) = false;
-           else
-               line(1,count) = true;
-           end
-           count=count+1;
-        elseif i == 3
-            if strcmp(match.Var3{1},'False')
-                set(handles.Sex,'String','F');
-                line(1,count) = false;
-                count=count+1;
-            else
-                set(handles.Sex,'String','M');
-                line(1,count) = true;
-                count=count+1;
-            end
+           line = [line match.Var2];
         end
     end
     dlmwrite('dataset.csv',line,'-append','delimiter',',','roffset',0)
@@ -308,35 +330,14 @@ elseif choice == 2
         data = readtable(full,opts);
         rows = data.Var1==str2double(id{1});
         match = data(rows,:);
-        line = zeros(1,length(match.Properties.VariableNames),'uint32');
-        count = 1;
+        line = [];
         for i=1:length(match.Properties.VariableNames)
             if i == 1
                 set(handles.img_name,'String',match.Var1);
-                line(1,count) = match.Var1;
-                count=count+1;
+                line = [line match.Var1];
             elseif i == 2 && length(match.Properties.VariableNames) == 3
                set(handles.age,'String',match.Var2);
-               line(1,count) = match.Var2;
-               count=count+1;
-            elseif i == 2 && length(match.Properties.VariableNames) == 2
-               set(handles.Sex,'String',match.Var2);
-               if strcmp(match.Var2,'F')
-                line(1,count) = false;
-               else
-                   line(1,count) = true;
-               end
-               count=count+1;
-            elseif i == 3
-               if strcmp(match.Var3{1},'False')
-                    set(handles.Sex,'String','F');
-                    line(1,count) = false;
-                    count=count+1;
-                else
-                    set(handles.Sex,'String','M');
-                    line(1,count) = true;
-                    count=count+1;
-                end
+               line = [line match.Var2];
             end
         end
         dlmwrite('dataset.csv',line,'-append','delimiter',',','roffset',0)
@@ -349,6 +350,7 @@ dirFlags = [files.isdir];
 % Extract only those that are directories.
 subFolders = files(dirFlags);
 set(handles.lb,'string',{subFolders.name});
+set(handles.lb2,'string',{subFolders.name});
 
 
 
@@ -410,19 +412,19 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on selection change in listbox3.
-function listbox3_Callback(hObject, eventdata, handles)
-% hObject    handle to listbox3 (see GCBO)
+% --- Executes on selection change in lb2.
+function lb2_Callback(hObject, eventdata, handles)
+% hObject    handle to lb2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns listbox3 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from listbox3
+% Hints: contents = cellstr(get(hObject,'String')) returns lb2 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from lb2
 
 
 % --- Executes during object creation, after setting all properties.
-function listbox3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to listbox3 (see GCBO)
+function lb2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to lb2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 

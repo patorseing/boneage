@@ -232,11 +232,11 @@ if idx > 3 & idx2 > 3 & idx ~= idx2
             set(handles.predict,'String',match.Var2);
             xmea = match.Var2;
             line = [line xmea];
-            % load gong;
-            % sound(y,Fs);
+            load gong;
+            sound(y,Fs);
             accuracy = abs(100 - (abs((xmea - xt) / xt) * 100));
-            line = [line accuracy];
             set(handles.accuracy,'String',accuracy);
+            line = [line double(accuracy)];
             total = total + accuracy;
         end
         disp(line);

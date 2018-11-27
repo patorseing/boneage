@@ -18,8 +18,12 @@ figure;imshow(L);
 
 %% adjust contrast
 J = histeq(I, 64);
-figure; imshow(J);
+% figure; imshow(J);
 
+J = imadjust(I);
+% figure; imshow(J);
+
+K = imadjust(K);
 %%
 % convert to bw
 
@@ -69,7 +73,7 @@ figure; imshow(J);
 % BW1 = imbinarize(Eim, .8);
 % figure; imshow(BW1); title('BW1');
 
-% %% Edge detection
+%% Edge detection
 % [~, threshold] = edge(img, 'sobel');
 % fudgeFactor = .5;
 % BWs = edge(img,'sobel', threshold * fudgeFactor);
@@ -207,18 +211,28 @@ for k = 1 : length(subFolders)
   fprintf('Sub folder #%d = %s\n', k, subFolders(k).name);
 end
 %%
-points = detectSURFFeatures(J);
-[features, valid_points] = extractFeatures(I, points); 
-figure; imshow(J); hold on;
-plot(valid_points.selectStrongest(10),'showOrientation',true);
-points = detectHarrisFeatures(J);
-[features, valid_corners] = extractFeatures(I, points); 
-figure; imshow(J); hold on;
-plot(valid_corners);
-points = detectHarrisFeatures(J);
-[features, valid_corners] = extractFeatures(I, points); 
-figure; imshow(J); hold on;
-plot(valid_points,'showOrientation',true);
+point1 = detectSURFFeatures(J);
+point2 = detectSURFFeatures(K);
+[feature1, valid_point1] = extractFeatures(J, point1); 
+[feature2, valid_point2] = extractFeatures(K, point2); 
+% figure; imshow(J); title('1'); hold on;
+% plot(valid_points.selectStrongest(10),'showOrientation',true);
+% points = detectHarrisFeatures(J);
+% [features, valid_corners] = extractFeatures(I, points); 
+% figure; imshow(J); title('2'); hold on;
+% plot(valid_corners);
+% points = detectHarrisFeatures(J);
+% [features, valid_corners] = extractFeatures(I, points); 
+figure; imshow(J); title('J'); hold on;
+plot(valid_point1,'showOrientation',true);
+figure; imshow(K); title('K'); hold on;
+plot(valid_point2,'showOrientation',true);
+%% match
+indexpairs = matchFeatures(feature1, feature2);
+matchedPoints1 = valid_point1(indexpairs(:,1));
+matchedPoints2 = valid_point2(indexpairs(:,2));
+figure; showMatchedFeatures(J,K,matchedPoints1,matchedPoints2);
+legend('matched points 1','matched points 2');
 %%
 I = imread('4360.png');
 se = strel(eye(5));
@@ -252,3 +266,9 @@ d2 = sqrt(d2);
 d3 = sqrt(d3);
 d4 = sqrt(d4);
 d5 = sqrt(d5);
+
+%% CNN
+path = '/Users/yok/Downloads/boneage-training-dataset/';
+categories = {1:228};
+imds = imageDatastore(fullfile(path,categories), 'LabelSource', 'foldernames');
+tbl = countEachLabel(imds);

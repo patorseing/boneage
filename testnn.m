@@ -104,7 +104,7 @@ L = imresize(L,0.25);
 L = imadjust(L);
 featuresL = extractLBPFeatures(L,'Upright',false);
 sim(net,featuresL')
-sim(net1,featuresL')
+a = sim(net1,featuresL')
 %%
 model = net1;
 save model;

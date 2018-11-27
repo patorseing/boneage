@@ -22,7 +22,7 @@ function varargout = boneage(varargin)
 
 % Edit the above text to modify the response to help boneage
 
-% Last Modified by GUIDE v2.5 24-Nov-2018 15:29:00
+% Last Modified by GUIDE v2.5 27-Nov-2018 06:47:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -64,6 +64,7 @@ dirFlags = [files.isdir];
 subFolders = files(dirFlags);
 set(handles.lb,'string',{subFolders.name});
 set(handles.lb2,'string',{subFolders.name});
+set(handles.lb4,'string',{subFolders.name});
 %set(handles.lb,'string',line);
 % UIWAIT makes boneage wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -162,6 +163,8 @@ if idx > 3 & idx2 > 3 & idx ~= idx2
     pattern = fullfile(testpath, '*.png');
     testfiles = dir(pattern);
     for i = 1: length(testfiles)
+        set(handles.predict,'String',' ');
+        set(handles.accuracy,'String',' ');
         line = [];
         xt = 0;
         xmea = 0;
@@ -234,16 +237,16 @@ if idx > 3 & idx2 > 3 & idx ~= idx2
             line = [line xmea];
             load gong;
             sound(y,Fs);
-            accuracy = abs(100 - (abs((xmea - xt) / xt) * 100));
+            accuracy = int64(100 - (abs((xmea - xt) / xt) * 100));
             set(handles.accuracy,'String',accuracy);
-            line = [line double(accuracy)];
+            line = [line accuracy];
             total = total + accuracy;
         end
         disp(line);
-        dlmwrite('result.csv',line,'-append','delimiter',',','roffset',0)
+        dlmwrite('resultEU.csv',line,'-append','delimiter',',','roffset',0)
     end
     total = total / length(testfiles);
-    dlmwrite('result.csv',total,'-append','delimiter',',','roffset',0)
+    dlmwrite('resultEU.csv',total,'-append','delimiter',',','roffset',0)
 end
 
 
@@ -351,6 +354,7 @@ dirFlags = [files.isdir];
 subFolders = files(dirFlags);
 set(handles.lb,'string',{subFolders.name});
 set(handles.lb2,'string',{subFolders.name});
+set(handles.lb4,'string',{subFolders.name});
 
 
 
@@ -432,4 +436,97 @@ function lb2_CreateFcn(hObject, eventdata, handles)
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in lb4.
+function lb4_Callback(hObject, eventdata, handles)
+% hObject    handle to lb4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns lb4 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from lb4
+
+
+% --- Executes during object creation, after setting all properties.
+function lb4_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to lb4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in NN.
+function NN_Callback(hObject, eventdata, handles)
+% hObject    handle to NN (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+load model;
+test = get(handles.lb4,'String');
+idx = get(handles.lb4,'value');
+set(handles.img_name,'String',' ');
+set(handles.age,'String',' ');
+set(handles.predict,'String',' ');
+set(handles.accuracy,'String',' ');
+axes(handles.axes1); cla;
+axes(handles.axes3); cla;
+if idx > 3
+    set(handles.img_name,'String',' ');
+    set(handles.age,'String',' ');
+    set(handles.predict,'String',' ');
+    set(handles.accuracy,'String',' ');
+    testpath = test{idx};
+    pattern = fullfile(testpath, '*.png');
+    testfiles = dir(pattern);
+    tic
+    for i = 1: length(testfiles)
+        set(handles.predict,'String',' ');
+        set(handles.accuracy,'String',' ');
+        line = [];
+        xt = 0;
+        xmea = 0;
+        base = testfiles(i).name;
+        full = fullfile(testpath, base);
+        pic = imread(full);
+        axes(handles.axes1);
+        imshow(pic);
+        featuresI = extractLBPFeatures(pic,'Upright',false);
+        pAge = sim(net1,featuresI');
+        [M, I] = max(pAge);
+        set(handles.predict,'String',I);
+        id = split(base, '.');
+        pattern = fullfile(testpath, '*.csv');
+        file = dir(pattern);
+        base = file.name;
+        full = fullfile(testpath, base);
+        data = readtable(full,'Delimiter',',','ReadVariableNames',false);
+        rows = data.Var1==str2double(id{1});
+        match = data(rows,:);
+        set(handles.img_name,'String',match.Var1);
+        line = [line int64(match.Var1)];
+        if length(match.Properties.VariableNames) == 2
+            xt = ceil(match.Var2/12); % xt = true value
+            set(handles.age,'String',xt);
+            line = [line xt];
+            xmea = I;
+            line = [line xmea];
+            load gong;
+            sound(y,Fs);
+            accuracy = int64(100 - (abs((xmea - xt) / xt) * 100));
+            set(handles.accuracy,'String',accuracy);
+            line = [line accuracy];
+            total = total + accuracy;
+        end
+        disp(line);
+        dlmwrite('resultNN.csv',line,'-append','delimiter',',','roffset',0)
+    end
+    toc
+    total = total / length(testfiles);
+    dlmwrite('resultNN.csv',total,'-append','delimiter',',','roffset',0)
 end

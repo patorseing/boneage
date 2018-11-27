@@ -156,15 +156,13 @@ if idx > 3 & idx2 > 3 & idx ~= idx2
     set(handles.age,'String',' ');
     set(handles.predict,'String',' ');
     set(handles.accuracy,'String',' ');
-    trainpath = train{idx2};
-    testpath = test{idx};
+    trainpath = train{idx};
+    testpath = test{idx2};
     pattern = fullfile(trainpath, '*.png');
     trainfiles = dir(pattern);
     pattern = fullfile(testpath, '*.png');
     testfiles = dir(pattern);
     for i = 1: length(testfiles)
-        set(handles.predict,'String',' ');
-        set(handles.accuracy,'String',' ');
         line = [];
         xt = 0;
         xmea = 0;
@@ -187,8 +185,8 @@ if idx > 3 & idx2 > 3 & idx ~= idx2
         set(handles.img_name,'String',match.Var1);
         line = [line uint64(match.Var1)];
         if length(match.Properties.VariableNames) == 2
-            set(handles.age,'String',match.Var2);
-            xt = match.Var2; % xt = true value
+            xt = ceil(match.Var2/12);
+            set(handles.age,'String',xt);
             line = [line xt];
         end
         tic
@@ -232,12 +230,12 @@ if idx > 3 & idx2 > 3 & idx ~= idx2
         line = [line uint64(str2num(id{1}))];
         match = data(rows,:);
         if length(match.Properties.VariableNames) == 2
-            set(handles.predict,'String',match.Var2);
-            xmea = match.Var2;
+            xmea = ceil(match.Var2/12);
+            set(handles.predict,'String',xmea);
             line = [line xmea];
-            load gong;
-            sound(y,Fs);
-            accuracy = int64(100 - (abs((xmea - xt) / xt) * 100));
+            % load gong;
+            % sound(y,Fs);
+            accuracy = 100 - (abs(xmea - xt) / max(xt,xmea) * 100);
             set(handles.accuracy,'String',accuracy);
             line = [line accuracy];
             total = total + accuracy;
@@ -485,9 +483,8 @@ if idx > 3
     pattern = fullfile(testpath, '*.png');
     testfiles = dir(pattern);
     tic
+    total = 0;
     for i = 1: length(testfiles)
-        set(handles.predict,'String',' ');
-        set(handles.accuracy,'String',' ');
         line = [];
         xt = 0;
         xmea = 0;
@@ -516,9 +513,9 @@ if idx > 3
             line = [line xt];
             xmea = I;
             line = [line xmea];
-            load gong;
-            sound(y,Fs);
-            accuracy = int64(100 - (abs((xmea - xt) / xt) * 100));
+            % load gong;
+            % sound(y,Fs);
+            accuracy = 100 - (abs(xmea - xt) / max(xt,xmea) * 100);
             set(handles.accuracy,'String',accuracy);
             line = [line accuracy];
             total = total + accuracy;

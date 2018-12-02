@@ -219,8 +219,12 @@ if idx > 3 & idx2 > 3 & idx ~= idx2
         imshow(pic);
         disp(char(originalImg(col)));
         disp(out);
-        base = split(char(originalImg(col)), '/');
-        id = split(base(2), '.');
+        if contains(char(originalImg(col)),'\')
+            base = split(char(originalImg(col)), '\');
+        else
+            base = split(char(originalImg(col)), '/');
+        end
+        id = split(base(2), '.')
         pattern = fullfile(trainpath, '*.csv');
         file = dir(pattern);
         base = file.name;

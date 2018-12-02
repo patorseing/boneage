@@ -1,8 +1,7 @@
 # boneage
 This project is developed as the project in ITCS476_Digital Image Processing (Mj.DB) that professor in class give the scope to us to set up the project and try to use image processing concept and creating gui to call the method that apply the concept.
 the feature is used in this project is Local binary patterns (LBP).
-run on Matlab that you have to install Comput
-r vision system toolbox (addon)
+run on Matlab that you have to install Computer vision system toolbox (addon)
 
 ##GUI
 ### Window OS
